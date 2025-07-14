@@ -1,0 +1,12 @@
+name: "main.stop"
+description: "Stop the main AI loop"
+developer: "main"
+project: "stop"
+parameters:
+  - name: "reason"
+    type: "string"
+    required: false
+    description: "Dont use this parameter, exept for debugging purposes (normal = not using)!"
+usage_examples:
+  - '{tool main.stop}'
+  - '{tool main.stop reason="Task completed"}'
