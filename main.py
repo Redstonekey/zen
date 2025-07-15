@@ -10,7 +10,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
+debug = False
 # Load configuration from YAML file
 with open('config/zen_config.yaml', 'r') as file:
     config = yaml.safe_load(file)
@@ -42,28 +42,45 @@ tool_summary = tool_info_gen.get_tool_summary()
 logger.info(f"Loaded {tool_summary['count']} tools: {', '.join(tool_summary['tools'].keys())}")
 
 running = True
+user_task = "Tell me two jokes"
+last_response = user_task  # Start with the initial user task
 
 ai.start_chat('main')
-print('chat starts:')
+
 while running:
-    answer = ai.chat("hey ehm could you use the speak tool only twice not infinite long and count the times and tell them the tool!", 'main')
+    # Send the last response (or initial task) to the AI
+    answer = ai.chat(last_response, 'main')
     print(f"AI Response: {answer}")
+    # Process the AI's response for tool commands
     tool_commands = tool_system.process_response(answer)
-    
+
+    if not tool_commands:
+        # If there are no tool commands, treat it as a spoken response
+        # and prepare to continue the loop, asking the AI what's next.
+        last_response = "What is the next step? If you are finished, use the main.stop tool."
+        continue
+
+    # Execute tool commands
+    execution_results = []
     for cmd in tool_commands:
         print(f"Executing command: {cmd.raw_command}")
         result = tool_system.execute_command(cmd)
         
         if result['success']:
             print(f"✅ Tool executed successfully: {result['result']}")
-            
-            # Check if the stop tool was executed
+            execution_results.append(f"Tool {cmd.name} executed successfully. Result: {result['result']}")
             if result.get('action') == 'stop_system':
                 running = False
                 logger.info("AI requested system shutdown")
-                break
+                break 
         else:
             print(f"❌ Tool execution failed: {result['error']}")
+            execution_results.append(f"Tool {cmd.name} failed. Error: {result['error']}")
+    
+    if not running:
+        break
 
+    # Feed the combined results of tool executions back to the AI for the next turn
+    last_response = f"SYSTEM: Tool execution results: {'; '.join(execution_results)}. Your task is still: '{user_task}'. What is the next step? If you are finished, use the main.stop tool."
 
 ai.clear_all_chats()

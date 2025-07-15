@@ -12,10 +12,9 @@ def execute(args: str) -> dict:
         # Simple argument parsing for text parameter
         if 'text=' in args:
             text = args.split('text=')[1].strip('"\'')
-            print(f"🔊 Zen AI: {text}")
             return {
                 'success': True,
-                'result': f"Spoken: {text}"
+                'result': f"{text}"
             }
         else:
             return {
