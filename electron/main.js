@@ -1,14 +1,17 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
+const http = require('http');
 
 // Python backend server integration
 let pyProc = null;
 const pyPort = 5000;
 
 function startServer() {
-  const script = path.join(__dirname, 'server.py');
-  pyProc = spawn('python', [script], { cwd: __dirname });
+  // Launch the Python server at project root
+  const script = path.join(__dirname, '..', 'server.py');
+  // Run server.py in project root so config paths resolve
+  pyProc = spawn('python', [script], { cwd: path.join(__dirname, '..') });
   if (pyProc) {
     console.log('Python server started on port', pyPort);
     pyProc.stdout.on('data', data => console.log(`PYTHON: ${data}`));
@@ -34,14 +37,24 @@ function createWindow() {
     }
   });
 
-  // Load the app from the Flask backend
-  win.loadURL(`http://192.168.1.114:${pyPort}`);
+  // Load the app from the local Flask backend
+  win.loadURL(`http://127.0.0.1:${pyPort}`);
 }
 
-// Start backend and window when Electron is ready
+// Start backend and wait for it before opening the window
 app.whenReady().then(() => {
   startServer();
-  createWindow();
+  // Poll the Python server until it's ready
+  const waitForServer = () => new Promise((resolve, reject) => {
+    const tryConnect = () => {
+      http.get({ host: '127.0.0.1', port: pyPort, path: '/' }, res => resolve())
+        .on('error', () => setTimeout(tryConnect, 500));
+    };
+    tryConnect();
+  });
+  waitForServer()
+    .then(() => createWindow())
+    .catch(err => console.error('Server failed to start:', err));
 });
 
 // Stop backend on all windows closed and quit
