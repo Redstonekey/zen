@@ -22,9 +22,12 @@ class ToolParser:
     """Parses and extracts tool commands from AI responses."""
     
     def __init__(self):
-        # Update regex to allow optional args
-        # Regex to match {tool name [args]} with optional args
-        self.tool_pattern = re.compile(r'\{tool\s+([^\s\}]+)(?:\s+([^}]+?))?\}')
+        # Regex to match {tool name [args]} across multiple lines, with optional args
+        # Use DOTALL so args can include newlines
+        self.tool_pattern = re.compile(
+            r'\{tool\s+([^\s\}]+)(?:\s+([\s\S]+?))?\}',
+            re.DOTALL
+        )
         self.logger = logging.getLogger(__name__)
     
     def parse_commands(self, text: str) -> List[ToolCommand]:

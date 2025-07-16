@@ -1,12 +1,12 @@
 name: "main.speak"
-description: "Print text to console"
+description: "returns a message to the user"
 developer: "main"
 project: "speak"
 parameters:
   - name: "text"
     type: "string"
     required: true
-    description: "The text to print to console"
+    description: "The text to return to the user"
 usage_examples:
   - '{tool main.speak text="Hello World"}'
   - '{tool main.speak text="Task completed successfully"}'

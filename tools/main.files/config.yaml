@@ -1,0 +1,53 @@
+name: "main.files"
+description: "List, read, write, create, delete, and search files and directories with safe backups"
+developer: "main"
+project: "files"
+parameters:
+  - name: "list"
+    type: "string"
+    required: false
+    description: "Directory path to list contents"
+  - name: "read"
+    type: "string"
+    required: false
+    description: "File path to read"
+  - name: "lines"
+    type: "string"
+    required: false
+    description: "Line range to read, e.g. '3-6'"
+  - name: "write"
+    type: "string"
+    required: false
+    description: "File path to write"
+  - name: "content"
+    type: "string"
+    required: false
+    description: "Content to write to file"
+  - name: "create"
+    type: "string"
+    required: false
+    description: "Path to create (file or directory). Use type parameter to specify 'file' or 'dir'"
+  - name: "type"
+    type: "string"
+    required: false
+    description: "Type for creation: 'file' or 'dir'"
+  - name: "delete"
+    type: "string"
+    required: false
+    description: "Path to delete"
+  - name: "search"
+    type: "string"
+    required: false
+    description: "Root path to search"
+  - name: "pattern"
+    type: "string"
+    required: false
+    description: "Regex pattern to search file and directory names"
+usage_examples:
+  - '{tool main.files list="./src"}'
+  - '{tool main.files read="./src/tool_parser.py"}'
+  - '{tool main.files read="./src/tool_parser.py" lines="3-6"}'
+  - '{tool main.files write="./test.txt" content="Hello World"}'
+  - '{tool main.files create="./new_dir" type="dir"}'
+  - '{tool main.files delete="./old_file.txt"}'
+  - '{tool main.files search="./src" pattern=".*\\.py$"}'

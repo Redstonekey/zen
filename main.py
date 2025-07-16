@@ -42,7 +42,7 @@ tool_summary = tool_info_gen.get_tool_summary()
 logger.info(f"Loaded {tool_summary['count']} tools: {', '.join(tool_summary['tools'].keys())}")
 
 running = True
-user_task = "Tell me two jokes"
+user_task = "hey could you create a new file called receptideas.txt in the classic windows documents folder and write a recipe idea in it a cocktail recipe pls?"
 last_response = user_task  # Start with the initial user task
 
 ai.start_chat('main')
@@ -69,10 +69,6 @@ while running:
         if result['success']:
             print(f"✅ Tool executed successfully: {result['result']}")
             execution_results.append(f"Tool {cmd.name} executed successfully. Result: {result['result']}")
-            if result.get('action') == 'stop_system':
-                running = False
-                logger.info("AI requested system shutdown")
-                break 
         else:
             print(f"❌ Tool execution failed: {result['error']}")
             execution_results.append(f"Tool {cmd.name} failed. Error: {result['error']}")
