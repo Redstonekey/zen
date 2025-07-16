@@ -105,6 +105,10 @@ Zen AI System
 ### Prerequisites
 - Python 3.8+
 - Google Gemini API key
+- Install project dependencies (including flask-cors) via:
+  ```powershell
+  pip install -r requirements.txt
+  ```
 
 ### Quick Start
 1. Clone the repository:
@@ -124,10 +128,16 @@ Zen AI System
      api_key: "your-gemini-api-key-here"
    ```
 
-4. Run the system:
+4. Run the core AI system:
    ```bash
    python main.py
    ```
+5. START the web server instead of opening files directly:
+   ```powershell
+   cd electron
+   python server.py
+   ```
+6. Open your browser at `http://localhost:5000/` — do **not** open the HTML file via file://, which will cause CORS errors.
 
 ## 🔧 Development
 

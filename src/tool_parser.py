@@ -89,9 +89,14 @@ class ToolParser:
 class ToolSystem:
     """Main tool system for parsing and executing tool commands."""
     
-    def __init__(self):
+    def __init__(self, tools_dir: str = "tools"):
+        """
+        Initialize the ToolSystem with a specific tools directory.
+        Args:
+            tools_dir: Path to the tools directory.
+        """
         self.parser = ToolParser()
-        self.loader = ToolLoader()
+        self.loader = ToolLoader(tools_dir)
         self.logger = logging.getLogger(__name__)
     
     def process_response(self, response: str) -> List[ToolCommand]:

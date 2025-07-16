@@ -198,44 +198,28 @@ class ChatApp {
         
         this.startGeneration();
         // Call backend chat endpoint
-        fetch(`${this.apiURL}/api/stream-chat`, {
+        fetch(`${this.apiURL}/chat`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ message: message })
+            body: JSON.stringify({
+                message: message,
+                selected_tools: Array.from(this.selectedTools)
+            })
         })
-        .then(response => {
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
-            const processChunk = ({ done, value }) => {
-                if (done) {
-                    this.stopGeneration();
-                    return;
-                }
-                buffer += decoder.decode(value, { stream: true });
-                const parts = buffer.split('\n\n');
-                buffer = parts.pop();
-                parts.forEach(part => {
-                    const lines = part.split('\n');
-                    const event = lines[0].replace('event: ', '');
-                    const data = JSON.parse(lines[1].replace('data: ', ''));
-                    if (event === 'ai_response') {
-                        this.addMessage(data.text, 'assistant');
-                    } else if (event === 'tool_result') {
-                        const content = data.success ?
-                            `✅ ${data.name} executed successfully: ${data.result}` :
-                            `❌ ${data.name} failed: ${data.error}`;
-                        this.addMessage(content, 'assistant');
-                    } else if (event === 'done') {
-                        this.stopGeneration();
-                        if (data.stop) {
-                            // Optionally indicate completion
-                        }
-                    }
+        .then(res => res.json())
+        .then(data => {
+            this.stopGeneration();
+            // Display AI response
+            this.addMessage(data.ai_response, 'assistant');
+            // Display tool execution results
+            if (data.tools && data.tools.length > 0) {
+                data.tools.forEach(tool => {
+                    const content = tool.success ?
+                        `✅ ${tool.name} executed successfully: ${tool.result}` :
+                        `❌ ${tool.name} failed: ${tool.error}`;
+                    this.addMessage(content, 'assistant');
                 });
-                return reader.read().then(processChunk);
-            };
-            return reader.read().then(processChunk);
+            }
         })
         .catch(err => {
             this.stopGeneration();

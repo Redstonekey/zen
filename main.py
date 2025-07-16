@@ -69,6 +69,11 @@ while running:
         if result['success']:
             print(f"✅ Tool executed successfully: {result['result']}")
             execution_results.append(f"Tool {cmd.name} executed successfully. Result: {result['result']}")
+            if result.get('action') == 'stop_system':
+                running = False
+                logger.info("AI requested system shutdown")
+                break 
+
         else:
             print(f"❌ Tool execution failed: {result['error']}")
             execution_results.append(f"Tool {cmd.name} failed. Error: {result['error']}")

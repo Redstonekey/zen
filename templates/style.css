@@ -245,13 +245,13 @@ body {
 }
 
 .user-menu-item:hover {
-    background-color: var(--hover-color);
+    background-color: #f3f4f6;
 }
 
 .user-menu-item svg {
     width: 16px;
     height: 16px;
-    color: var(--text-secondary);
+    color: #6b7280;
 }
 
 .theme-toggle {
@@ -265,7 +265,7 @@ body {
     position: relative;
     width: 44px;
     height: 24px;
-    background-color: var(--border-color);
+    background-color: #e5e7eb;
     border-radius: 12px;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -282,7 +282,7 @@ body {
     left: 2px;
     width: 20px;
     height: 20px;
-    background-color: var(--white);
+    background-color: white;
     border-radius: 50%;
     transition: transform 0.3s ease;
 }
@@ -398,6 +398,10 @@ body {
     font-weight: 600;
     margin-bottom: 32px;
     color: var(--text-primary);
+}
+
+.input-area.disabled {
+    /* Remove disabled state - allow input during generation */
 }
 
 .input-container {

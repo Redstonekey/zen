@@ -1,6 +1,7 @@
 import yaml
 import logging
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS  # enable CORS for browser clients
 from src.ai.gemini import Gemini
 from src.tool_parser import ToolSystem
 from src.tool_info import ToolInfoGenerator
@@ -30,12 +31,27 @@ ai.start_chat('main')
 
 tool_system = ToolSystem()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../website', static_url_path='')
+# Allow cross-origin requests from any origin
+CORS(app)
+
+# Serve the frontend index.html
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# New endpoint to list available tools
+@app.route('/tools', methods=['GET'])
+def list_tools():
+    summary = tool_info_gen.get_tool_summary()
+    tools = [{'name': name, 'description': info['description']} for name, info in summary['tools'].items()]
+    return jsonify({'tools': tools})
 
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.json or {}
     message = data.get('message', '')
+    selected_tools = data.get('selected_tools', [])  # get selected tools from client
     if not message:
         return jsonify({'error': 'Empty message'}), 400
 
@@ -43,6 +59,9 @@ def chat():
     ai_response = ai.chat(message, 'main')
     # Process tool commands
     commands = tool_system.process_response(ai_response)
+    # Filter commands by selected tools if provided
+    if selected_tools:
+        commands = [cmd for cmd in commands if cmd.name in selected_tools]
     results = []
     for cmd in commands:
         res = tool_system.execute_command(cmd)

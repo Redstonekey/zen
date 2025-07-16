@@ -1,5 +1,5 @@
 name: "main.files"
-description: "List, read, write, create, delete, and search files and directories with safe backups"
+description: "List, read, write, create, delete, and search files and directories with safe backups. Use full length paths!"
 developer: "main"
 project: "files"
 parameters:
@@ -44,10 +44,10 @@ parameters:
     required: false
     description: "Regex pattern to search file and directory names"
 usage_examples:
-  - '{tool main.files list="./src"}'
-  - '{tool main.files read="./src/tool_parser.py"}'
-  - '{tool main.files read="./src/tool_parser.py" lines="3-6"}'
-  - '{tool main.files write="./test.txt" content="Hello World"}'
-  - '{tool main.files create="./new_dir" type="dir"}'
-  - '{tool main.files delete="./old_file.txt"}'
-  - '{tool main.files search="./src" pattern=".*\\.py$"}'
+  - '{tool main.files list="c:/Users/test/"}'
+  - '{tool main.files read="c:/Users/test/src/tool_parser.py"}'
+  - '{tool main.files read="c:/Users/test/src/tool_parser.py" lines="3-6"}'
+  - '{tool main.files write="c:/Users/test/Documents/test.txt" content="Hello World"}'
+  - '{tool main.files create="c:/Users/test/Documents/new_dir" type="dir"}'
+  - '{tool main.files delete="c:/Users/test/Documents/old_file.txt"}'
+  - '{tool main.files search="c:/Users/test/Documents/src" pattern=".*\\.py$"}'
