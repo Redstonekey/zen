@@ -6,7 +6,6 @@ import json
 from src.ai.gemini import Gemini
 from src.tool_parser import ToolSystem
 from src.tool_info import ToolInfoGenerator
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -117,7 +116,6 @@ def chat():
         'stop': stop_flag
     })
 
-# Streaming chat endpoint using Server-Sent Events
 @app.route('/api/stream-chat', methods=['POST'])
 def stream_chat():
     data = request.get_json()
@@ -157,6 +155,15 @@ def stream_chat():
 
     return Response(event_stream(), mimetype='text/event-stream')
 
+# New chat endpoint resets AI context
+@app.route('/api/new-chat', methods=['POST'])
+def new_chat():
+    # Clear and restart the main chat session
+    #later add 
+    ai.clear_chat('main')
+    ai.start_chat('main')
+    return jsonify({'success': True})
+
 if __name__ == '__main__':
     # Run Flask app
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)

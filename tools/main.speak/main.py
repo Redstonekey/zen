@@ -14,7 +14,8 @@ def execute(args: str) -> dict:
             text = args.split('text=')[1].strip('"\'')
             return {
                 'success': True,
-                'result': f"{text}"
+                'result': text,
+                'action': 'speak'
             }
         else:
             return {

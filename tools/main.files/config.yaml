@@ -1,6 +1,6 @@
 name: "main.files"
-description: "List, read, write, create, delete, and search files and directories with safe backups. Use full length paths!"
-developer: "main"
+description: "List, read, write, create, delete, and search files and directories with safe backups. Use full length paths for the user! the usage_examples are examples not real paths!"
+developer: "standart libary"
 project: "files"
 parameters:
   - name: "list"

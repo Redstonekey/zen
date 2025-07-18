@@ -1,6 +1,6 @@
 name: "main.speak"
 description: "returns a message to the user"
-developer: "main"
+developer: "standart libary"
 project: "speak"
 parameters:
   - name: "text"

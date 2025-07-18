@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
@@ -30,16 +30,41 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
+    frame: false, // Remove the default title bar and window controls
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: false,
+      contextIsolation: true
     }
   });
 
   // Load the app from the local Flask backend
   win.loadURL(`http://127.0.0.1:${pyPort}`);
+  
+  return win;
 }
+
+// IPC handlers for window controls
+ipcMain.handle('window-minimize', () => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) win.minimize();
+});
+
+ipcMain.handle('window-maximize', () => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    if (win.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win.maximize();
+    }
+  }
+});
+
+ipcMain.handle('window-close', () => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) win.close();
+});
 
 // Start backend and wait for it before opening the window
 app.whenReady().then(() => {

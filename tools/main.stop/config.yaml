@@ -1,6 +1,6 @@
 name: "main.stop"
 description: "Stop the main AI loop so the user can answer you or ask you something."
-developer: "main"
+developer: "standart libary"
 project: "stop"
 parameters:
   - name: "reason"

@@ -44,6 +44,15 @@ class ChatApp {
         // Theme toggle
         this.themeSwitch = document.getElementById('themeSwitch');
         
+        // Sidebar toggle
+        this.toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+        this.sidebar = document.querySelector('.sidebar');
+        
+        // Title bar controls
+        this.minimizeBtn = document.getElementById('minimizeBtn');
+        this.maximizeBtn = document.getElementById('maximizeBtn');
+        this.closeBtn = document.getElementById('closeBtn');
+        
         // Prevent menu from closing when clicking theme toggle
         const themeToggleItem = document.querySelector('.user-menu-item .theme-toggle');
         if (themeToggleItem) {
@@ -104,10 +113,60 @@ class ChatApp {
         toolCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => this.updateToolSelection());
         });
+        
+        // Sidebar toggle
+        this.toggleSidebarBtn.addEventListener('click', () => this.toggleSidebar());
+        
+        // Title bar controls
+        this.minimizeBtn.addEventListener('click', () => this.minimizeWindow());
+        this.maximizeBtn.addEventListener('click', () => this.maximizeWindow());
+        this.closeBtn.addEventListener('click', () => this.closeWindow());
     }
     
     toggleUserMenu() {
         this.userMenu.classList.toggle('active');
+    }
+    
+    toggleSidebar() {
+        this.sidebar.classList.toggle('collapsed');
+        // Update the arrow direction
+        const arrow = this.toggleSidebarBtn.querySelector('svg polyline');
+        if (this.sidebar.classList.contains('collapsed')) {
+            arrow.setAttribute('points', '9 18 15 12 9 6'); // Point right
+        } else {
+            arrow.setAttribute('points', '15 18 9 12 15 6'); // Point left
+        }
+    }
+    
+    // Window control methods
+    minimizeWindow() {
+        // Send message to Electron main process to minimize window
+        if (window.electronAPI) {
+            window.electronAPI.minimize();
+        } else {
+            // Fallback for development/browser environment
+            console.log('Minimize window (Electron not available)');
+        }
+    }
+    
+    maximizeWindow() {
+        // Send message to Electron main process to maximize/restore window
+        if (window.electronAPI) {
+            window.electronAPI.maximize();
+        } else {
+            // Fallback for development/browser environment
+            console.log('Maximize window (Electron not available)');
+        }
+    }
+    
+    closeWindow() {
+        // Send message to Electron main process to close window
+        if (window.electronAPI) {
+            window.electronAPI.close();
+        } else {
+            // Fallback for development/browser environment
+            console.log('Close window (Electron not available)');
+        }
     }
     
     setupAutoResize() {
@@ -425,6 +484,11 @@ class ChatApp {
     }
     
     createNewChat() {
+        // Reset AI context in backend
+        fetch(`${this.apiURL}/api/new-chat`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => console.log('Backend chat reset:', data))
+            .catch(err => console.error('Failed to reset backend chat:', err));
         this.currentChatId++;
         this.isNewChat = true;
         
@@ -482,7 +546,7 @@ class ChatApp {
     }
     
     formatTime(date) {
-        return date.toLocaleTimeString('en-US', { 
+        return date.toLocaleTimeString('de-DE', { 
             hour: '2-digit', 
             minute: '2-digit' 
         });

@@ -1,0 +1,20 @@
+name: "main.memory"
+description: 'Use this to list and read memory'
+developer: "standart libary"
+project: "memory"
+parameter:
+  - name: "list"
+    type: "string"
+    required: false
+    description: "list a short description of the stored memory with theire ids"
+  - name: 'read'
+    type: "string"
+    required: false
+    description: "read a memory"
+  - name: 'memory_id'
+    type: "string"
+    required: false
+    description: 'the memory id of the memory to read'
+usage_examples:
+  - '{tool main.memory list=True}'
+  - '{tool main.memory read=True memory_id="3"}'
