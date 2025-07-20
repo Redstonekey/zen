@@ -69,6 +69,14 @@ def static_proxy(path):
 def chat():
     data = request.get_json()
     user_message = data.get('message', '')
+    selected_tools = data.get('selected_tools', None)
+
+    # If selected_tools is provided, restrict available tools
+    always_on = {'main.speak', 'main.stop', 'main.memory'}
+    if selected_tools:
+        allowed_tools = set(selected_tools) | always_on
+    else:
+        allowed_tools = set(tool_system.list_available_tools().keys()) | always_on
 
     last_response = user_message
     ai_responses = []
@@ -77,11 +85,17 @@ def chat():
 
     # Run AI-tool loop until stop
     while True:
+        # Update system instructions to only mention allowed tools
+        tool_names_str = ', '.join(allowed_tools)
+        ai.system_instruction = tool_info_gen.update_ai_instructions(
+            f"You may only use these tools: {tool_names_str}. Do not mention or use any other tools."
+        )
         answer = ai.chat(last_response, 'main')
         logger.info(f"AI Response: {answer}")
         ai_responses.append(answer)
 
-        tool_commands = tool_system.process_response(answer)
+        # Only process tool commands for allowed tools
+        tool_commands = [cmd for cmd in tool_system.process_response(answer) if cmd.name in allowed_tools]
         if not tool_commands:
             break
 
@@ -120,19 +134,31 @@ def chat():
 def stream_chat():
     data = request.get_json()
     user_message = data.get('message', '')
+    selected_tools = data.get('selected_tools', None)
+
+    always_on = {'main.speak', 'main.stop', 'main.memory'}
+    if selected_tools:
+        allowed_tools = set(selected_tools) | always_on
+    else:
+        allowed_tools = set(tool_system.list_available_tools().keys()) | always_on
 
     def event_stream():
         last_resp = user_message
         stop_flag = False
         entries = []
         while True:
+            # Update system instructions to only mention allowed tools
+            tool_names_str = ', '.join(allowed_tools)
+            ai.system_instruction = tool_info_gen.update_ai_instructions(
+                f"You may only use these tools: {tool_names_str}. Do not mention or use any other tools."
+            )
             # AI response
             answer = ai.chat(last_resp, 'main')
             logger.info(f"AI Response: {answer}")
             yield f"event: ai_response\ndata: {json.dumps({'text': answer})}\n\n"
 
-            # Tools
-            cmds = tool_system.process_response(answer)
+            # Only process tool commands for allowed tools
+            cmds = [cmd for cmd in tool_system.process_response(answer) if cmd.name in allowed_tools]
             if not cmds:
                 break
             for cmd in cmds:

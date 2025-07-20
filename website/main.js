@@ -204,7 +204,9 @@ class ChatApp {
         fetch(`${this.apiURL}/tools`)
             .then(res => res.json())
             .then(data => {
-                this.availableTools = data.tools || [];
+                // Filter out always-on tools from UI
+                const alwaysOn = ['main.speak', 'main.stop', 'main.memory'];
+                this.availableTools = (data.tools || []).filter(tool => !alwaysOn.includes(tool.name));
                 this.renderToolOptions();
             })
             .catch(err => console.error('Failed to load tools', err));
@@ -257,10 +259,13 @@ class ChatApp {
         
         this.startGeneration();
         // Call backend chat endpoint
+        // Collect selected tools as array, always include always-on tools
+        const alwaysOn = ['main.speak', 'main.stop', 'main.memory'];
+        const selectedTools = Array.from(new Set([...this.selectedTools, ...alwaysOn]));
         fetch(`${this.apiURL}/api/stream-chat`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ message: message })
+            body: JSON.stringify({ message: message, selected_tools: selectedTools })
         })
         .then(response => {
             const reader = response.body.getReader();
