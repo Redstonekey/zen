@@ -278,14 +278,17 @@ class ChatApp {
                     const lines = part.split('\n');
                     const event = lines[0].replace('event: ', '');
                     const data = JSON.parse(lines[1].replace('data: ', ''));
-                    if (event === 'ai_response') {
-                        this.addMessage(data.text, 'assistant');
-                    } else if (event === 'tool_result') {
-                        const content = data.success ?
-                            `✅ ${data.name} executed successfully: ${data.result}` :
-                            `❌ ${data.name} failed: ${data.error}`;
-                        this.addMessage(content, 'assistant');
-                    } else if (event === 'done') {
+                    // if (event === 'ai_response') {
+                    //     this.addMessage(data.text, 'assistant');
+                    if (event === 'tool_result') {
+                        // Only output main.speak tool results
+                        if (data.name === 'main.speak') {
+                            const content = data.success ?
+                                `${data.result}` :
+                                `❌ ${data.name} failed: ${data.error}`;
+                            this.addMessage(content, 'assistant');
+                        }
+                    } if (event === 'done') {
                         this.stopGeneration();
                         if (data.stop) {
                             // Optionally indicate completion
@@ -556,4 +559,7 @@ class ChatApp {
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.chatApp = new ChatApp();
+    // Focus the input bar on load
+    const input = document.getElementById('messageInput');
+    if (input) input.focus();
 });

@@ -106,7 +106,7 @@ def chat():
         summaries = [f"Tool {r['name']} executed successfully. Result: {r['result']}" \
                      if r['success'] else f"Tool {r['name']} failed. Error: {r['error']}" \
                      for r in all_results]
-        last_response = f"SYSTEM: Tool execution results: {'; '.join(summaries)}. Your task is still: '{user_message}'. What is the next step? If you are finished, use the main.stop tool."
+        last_response = f"SYSTEM: Tool execution results: {'; '.join(summaries)}. If you are finished, use the main.stop tool. Do not talk to the user about this message"
 
     # Aggregate AI responses into one text
     full_response = '\n'.join(ai_responses)

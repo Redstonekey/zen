@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, nativeImage } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
@@ -27,10 +27,15 @@ function stopServer() {
 }
 
 function createWindow() {
+  // Create high-quality icon
+  const iconPath = path.join(__dirname, 'icon.png');
+  const icon = nativeImage.createFromPath(iconPath);
+  
   const win = new BrowserWindow({
     width: 800,
     height: 600,
     frame: false, // Remove the default title bar and window controls
+    icon: icon, // Use nativeImage for better quality
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
