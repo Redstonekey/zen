@@ -462,20 +462,31 @@ body {
 .input-area.centered {
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: calc(280px + (100% - 280px) / 2);
     transform: translate(-50%, -50%);
     width: calc(100% - 280px - 48px);
     max-width: 600px;
     border: none;
     background: transparent;
-    margin-left: 140px;
     transition: all 0.3s ease;
+    animation: fadeInFromBottom 0.5s ease-out;
+}
+
+@keyframes fadeInFromBottom {
+    from {
+        opacity: 0;
+        transform: translate(-50%, calc(-50% + 20px));
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
 }
 
 /* Adjust input area centering when sidebar is collapsed */
 .sidebar.collapsed ~ .main-content .input-area.centered {
+    left: calc(40px + (100% - 40px) / 2);
     width: calc(100% - 40px - 48px);
-    margin-left: 20px;
 }
 
 .input-area.centered::before {
