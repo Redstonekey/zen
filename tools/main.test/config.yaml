@@ -1,0 +1,7 @@
+name: "main.test"
+description: "This is a Test libary to test the tool system."
+developer: "standart libary"
+project: "test"
+parameters:
+usage_examples:
+  - '{tool main.test}'

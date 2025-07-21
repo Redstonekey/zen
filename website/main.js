@@ -19,6 +19,37 @@ class ChatApp {
         // Load available tools from backend on startup
         this.loadAvailableTools();
         this.setupAutoResize();
+
+        // Restore selected tools from cookies
+        this.restoreSelectedToolsFromCookies();
+    }
+    // Cookie helpers
+    setCookie(name, value, days = 365) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+    }
+
+    getCookie(name) {
+        return document.cookie.split('; ').reduce((r, v) => {
+            const parts = v.split('=');
+            return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+        }, '');
+    }
+
+    saveSelectedToolsToCookies() {
+        this.setCookie('selectedTools', JSON.stringify(Array.from(this.selectedTools)));
+    }
+
+    restoreSelectedToolsFromCookies() {
+        const cookie = this.getCookie('selectedTools');
+        if (cookie) {
+            try {
+                const arr = JSON.parse(cookie);
+                if (Array.isArray(arr)) {
+                    this.selectedTools = new Set(arr);
+                }
+            } catch (e) {}
+        }
     }
     
     initializeElements() {
@@ -33,26 +64,36 @@ class ChatApp {
         this.closeModal = document.getElementById('closeModal');
         this.applyTools = document.getElementById('applyTools');
         this.clearTools = document.getElementById('clearTools');
-        
+
         // New elements
         this.pauseBtn = document.getElementById('pauseBtn');
         this.stopBtn = document.getElementById('stopBtn');
         this.inputArea = document.querySelector('.input-area');
         this.userAvatar = document.querySelector('.user-avatar');
         this.userMenu = document.getElementById('userMenu');
-        
+
         // Theme toggle
         this.themeSwitch = document.getElementById('themeSwitch');
-        
+
         // Sidebar toggle
         this.toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
         this.sidebar = document.querySelector('.sidebar');
-        
+        // Collapse sidebar by default, and prevent animation on load
+        if (this.sidebar) {
+            this.sidebar.classList.add('collapsed');
+            // Remove transition for initial load
+            this.sidebar.classList.remove('enable-transition');
+            // Enable transition after a short delay (next tick)
+            setTimeout(() => {
+                this.sidebar.classList.add('enable-transition');
+            }, 50);
+        }
+
         // Title bar controls
         this.minimizeBtn = document.getElementById('minimizeBtn');
         this.maximizeBtn = document.getElementById('maximizeBtn');
         this.closeBtn = document.getElementById('closeBtn');
-        
+
         // Prevent menu from closing when clicking theme toggle
         const themeToggleItem = document.querySelector('.user-menu-item .theme-toggle');
         if (themeToggleItem) {
@@ -60,10 +101,10 @@ class ChatApp {
                 e.stopPropagation();
             });
         }
-        
+
         // Initialize with centered input for new chat
         this.inputArea.classList.add('centered');
-        
+
         // Initialize theme
         this.initializeTheme();
     }
@@ -238,6 +279,10 @@ class ChatApp {
         const toolCheckboxes = modalBody.querySelectorAll('input[type="checkbox"][data-tool]');
         toolCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => this.updateToolSelection());
+            // Restore checked state from cookies
+            if (this.selectedTools.has(checkbox.dataset.tool)) {
+                checkbox.checked = true;
+            }
         });
     }
 
@@ -292,13 +337,22 @@ class ChatApp {
                                 `${data.result}` :
                                 `❌ ${data.name} failed: ${data.error}`;
                             this.addMessage(content, 'assistant');
+                        } else if (data.name === 'main.stop') {
+                        } else {
+                            this.addMessageTool({
+                                toolName: data.name || 'Tool',
+                                result: data.success ? (data.result || 'Success') : (data.error || 'Error'),
+                                success: !!data.success,
+                                details: data.details || ''
+                            }, 'assistant');
                         }
-                    } if (event === 'done') {
+                    } else if (event === 'done') {
                         this.stopGeneration();
                         if (data.stop) {
                             // Optionally indicate completion
                         }
                     }
+        
                 });
                 return reader.read().then(processChunk);
             };
@@ -402,6 +456,56 @@ class ChatApp {
         this.chatContainer.appendChild(messageElement);
         this.scrollToBottom();
     }
+    addMessageTool({ toolName, result, success, details = '' }, sender = 'assistant') {
+        // Create a special tool message element
+        const messageElement = document.createElement('div');
+        messageElement.className = `message tool-message ${sender}`;
+
+        // Tool icon (wrench)
+        const toolIcon = document.createElement('div');
+        toolIcon.className = 'tool-message-icon';
+        toolIcon.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a5 5 0 0 1-6.6 6.6l-4.1 4.1a2 2 0 1 0 2.8 2.8l4.1-4.1a5 5 0 1 1 6.6-6.6z"/></svg>';
+
+        // Tool content
+        const messageContent = document.createElement('div');
+        messageContent.className = 'tool-message-content';
+
+        // Tool name and status
+        const toolHeader = document.createElement('div');
+        toolHeader.className = 'tool-message-header';
+        toolHeader.innerHTML = `
+            <span class="tool-message-toolname">${toolName.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+            <span class="tool-message-status" style="color: ${success ? '#2ecc40' : '#ff4136'}; font-size: 1.2em; margin-left: 8px;">${success ? '✔️' : '❌'}</span>
+        `;
+
+        // Tool result
+        const toolResult = document.createElement('div');
+        toolResult.className = 'tool-message-result';
+        toolResult.textContent = result;
+
+        // Optional details
+        if (details) {
+            const toolDetails = document.createElement('div');
+            toolDetails.className = 'tool-message-details';
+            toolDetails.textContent = details;
+            messageContent.appendChild(toolDetails);
+        }
+
+        // Time
+        const messageTime = document.createElement('div');
+        messageTime.className = 'message-time';
+        messageTime.textContent = this.formatTime(new Date());
+
+        messageContent.appendChild(toolHeader);
+        messageContent.appendChild(toolResult);
+        messageContent.appendChild(messageTime);
+
+        messageElement.appendChild(toolIcon);
+        messageElement.appendChild(messageContent);
+
+        this.chatContainer.appendChild(messageElement);
+        this.scrollToBottom();
+    }
     
     simulateAIResponse(userMessage) {
         let response = "I understand you're asking about: \"" + userMessage + "\". ";
@@ -430,8 +534,14 @@ class ChatApp {
     
     updateToolSelection() {
         const checkboxes = document.querySelectorAll('input[type="checkbox"][data-tool]');
-        const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-        
+        this.selectedTools.clear();
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                this.selectedTools.add(cb.dataset.tool);
+            }
+        });
+        this.saveSelectedToolsToCookies();
+        const selectedCount = this.selectedTools.size;
         if (selectedCount > 0) {
             this.toolBtn.classList.add('active');
         } else {
@@ -442,13 +552,12 @@ class ChatApp {
     applySelectedTools() {
         const checkboxes = document.querySelectorAll('input[type="checkbox"][data-tool]');
         this.selectedTools.clear();
-        
         checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
                 this.selectedTools.add(checkbox.dataset.tool);
             }
         });
-        
+        this.saveSelectedToolsToCookies();
         this.updateSelectedToolsDisplay();
         this.closeToolModal();
     }
@@ -458,8 +567,8 @@ class ChatApp {
         checkboxes.forEach(checkbox => {
             checkbox.checked = false;
         });
-        
         this.selectedTools.clear();
+        this.saveSelectedToolsToCookies();
         this.updateSelectedToolsDisplay();
         this.toolBtn.classList.remove('active');
     }
@@ -480,13 +589,12 @@ class ChatApp {
     
     removeSelectedTool(tool) {
         this.selectedTools.delete(tool);
-        
+        this.saveSelectedToolsToCookies();
         // Update checkbox state
         const checkbox = document.querySelector(`input[data-tool="${tool}"]`);
         if (checkbox) {
             checkbox.checked = false;
         }
-        
         this.updateSelectedToolsDisplay();
         this.updateToolSelection();
     }

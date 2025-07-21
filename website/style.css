@@ -1,3 +1,85 @@
+/* Tool message styles */
+/* Compact Tool message styles */
+.tool-message {
+  display: flex;
+  align-items: center;
+  background: var(--tool-bg, #f3f6fa);
+  border-left: 3px solid var(--tool-accent, #0074d9);
+  border-radius: 6px;
+  margin: 8px 0 8px 0;
+  padding: 6px 10px 6px 8px;
+  box-shadow: none;
+  position: relative;
+  min-height: 32px;
+  font-size: 13px;
+  max-width: 420px;
+}
+.tool-message .tool-message-icon {
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  color: var(--tool-accent, #0074d9);
+  flex-shrink: 0;
+  font-size: 1em;
+  width: 20px;
+  height: 20px;
+}
+.tool-message-content {
+  flex: 1;
+  min-width: 0;
+}
+.tool-message-header {
+  font-weight: 500;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+}
+.tool-message-toolname {
+  color: var(--tool-accent, #0074d9);
+  letter-spacing: 0.01em;
+}
+.tool-message-status {
+  margin-left: 6px;
+  font-size: 1.1em;
+  vertical-align: middle;
+}
+.tool-message-result {
+  font-size: 0.97em;
+  color: #222;
+  margin: 0;
+  word-break: break-word;
+}
+.tool-message-details {
+  font-size: 0.92em;
+  color: #666;
+  margin: 0;
+  word-break: break-word;
+}
+.tool-message .message-time {
+  font-size: 0.78em;
+  color: #aaa;
+  margin-top: 0;
+}
+
+/* Dark mode for tool-message */
+[data-theme="dark"] .tool-message {
+  background: var(--tool-bg-dark, #23272e);
+  border-left-color: var(--tool-accent-dark, #19c37d);
+}
+[data-theme="dark"] .tool-message .tool-message-icon,
+[data-theme="dark"] .tool-message-toolname {
+  color: var(--tool-accent-dark, #19c37d);
+}
+[data-theme="dark"] .tool-message-result {
+  color: #e5e5e5;
+}
+[data-theme="dark"] .tool-message-details {
+  color: #a1a1a1;
+}
+[data-theme="dark"] .tool-message .message-time {
+  color: #666;
+}
 :root {
     --primary-color: #10a37f;
     --secondary-color: #19c37d;
@@ -117,6 +199,9 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    /* Remove transition by default, add via JS after load if needed */
+}
+.sidebar.enable-transition {
     transition: width 0.3s ease;
 }
 
