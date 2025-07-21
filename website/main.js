@@ -22,6 +22,8 @@ class ChatApp {
 
         // Restore selected tools from cookies
         this.restoreSelectedToolsFromCookies();
+        // Show selected tools below input bar on load
+        this.updateSelectedToolsDisplay();
     }
     // Cookie helpers
     setCookie(name, value, days = 365) {
