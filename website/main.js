@@ -472,11 +472,12 @@ class ChatApp {
         const messageContent = document.createElement('div');
         messageContent.className = 'tool-message-content';
 
-        // Tool name and status
+        // Tool name and status (show only after dot)
+        const displayName = toolName.split('.').pop().replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
         const toolHeader = document.createElement('div');
         toolHeader.className = 'tool-message-header';
         toolHeader.innerHTML = `
-            <span class="tool-message-toolname">${toolName.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+            <span class="tool-message-toolname">${displayName}</span>
             <span class="tool-message-status" style="color: ${success ? '#2ecc40' : '#ff4136'}; font-size: 1.2em; margin-left: 8px;">${success ? '✔️' : '❌'}</span>
         `;
 
@@ -577,12 +578,13 @@ class ChatApp {
     
     updateSelectedToolsDisplay() {
         this.selectedToolsContainer.innerHTML = '';
-        
         this.selectedTools.forEach(tool => {
+            // Only show the part after the dot (e.g. main.test -> Test)
+            const displayName = tool.split('.').pop().replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
             const toolTag = document.createElement('div');
             toolTag.className = 'tool-tag';
             toolTag.innerHTML = `
-                ${tool.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                ${displayName}
                 <button onclick="chatApp.removeSelectedTool('${tool}')">×</button>
             `;
             this.selectedToolsContainer.appendChild(toolTag);

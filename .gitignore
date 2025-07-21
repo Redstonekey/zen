@@ -2,3 +2,5 @@
 /test.py
 /electron/node_modules
 **/__pycache__/
+/tools/*/
+!/tools/*main*/
