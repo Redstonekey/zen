@@ -49,8 +49,10 @@ class ToolLoader:
                 config = yaml.safe_load(f)
             
             # Load Python module
+            # Replace dots in folder name with underscores for valid module name
+            module_name = f"tool_{tool_folder.name.replace('.', '_')}"
             spec = importlib.util.spec_from_file_location(
-                f"tool_{tool_folder.name}", main_file
+                module_name, main_file
             )
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
@@ -91,8 +93,20 @@ class ToolLoader:
                 'error': f"Tool '{tool_name}' not found"
             }
         
+        import inspect
+        import asyncio
         try:
             result = tool['execute'](args)
+            if inspect.iscoroutine(result):
+                # If already in an event loop, use create_task and run until complete
+                try:
+                    loop = asyncio.get_running_loop()
+                    # For Flask, this should rarely happen, but just in case
+                    fut = asyncio.ensure_future(result)
+                    result = loop.run_until_complete(fut)
+                except RuntimeError:
+                    # No running loop, safe to use asyncio.run
+                    result = asyncio.run(result)
             return result
         except Exception as e:
             self.logger.error(f"Error executing tool {tool_name}: {str(e)}")

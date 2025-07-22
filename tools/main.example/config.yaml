@@ -1,0 +1,16 @@
+name: "main.example"
+description: "This is a example tool for Developer. Do not use it in production"
+developer: "Here comes you name."
+project: "example"
+parameters:
+  - name: "first_arg"
+    type: "string"
+    required: true
+    description: "Enter any string as the first argument"
+  - name: "second_arg"
+    type: "boolean"
+    required: false
+    description: "Set whether this setting is set to True or not"
+usage_examples:
+  - '{tool main.example first_arg="Hello world"}'
+  - '{tool main.example first_arg="Hi world" second_arg=True}'
